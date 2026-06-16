@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexura Premium Core Banking & Domain Hub</title>
+    <style>
+        :root {
+            --bg-color: #030712;
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --gold: #f59e0b;
+            --gold-glow: #d97706;
+            --text-main: #f3f4f6;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 20px;
+        }
+        h1, h2 { text-align: center; color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media(max-width: 768px) { .container { grid-template-columns: 1fr; } }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 16px; padding: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { color: var(--gold); }
+        .btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-glow));
+            border: none; color: black; font-weight: bold;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            width: 100%; margin-top: 15px; transition: 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 0 15px var(--gold); }
+        input {
+            width: 93%; padding: 10px; margin: 8px 0;
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px; color: white;
+        }
+        .star-badge { color: #facc15; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <h1>NEXURA CORE SYSTEM</h1>
+    
+    <div class="container">
+        <!-- WEB 1: BANKING SYSTEM -->
+        <div class="card">
+            <h2>Web 1: Secure Bank Accounts</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Balance</th>
+                        <th>Stats</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for name, info in users.items() %}
+                    <tr>
+                        <td><strong>{{ name }}</strong></td>
+                        <td style="color: #4ade80;">Rs. {{ "{:,}".format(info.balance) }}</td>
+                        <td><span class="star-badge">⭐ {{ info.stars }} (Lvl {{ info.level }})</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <button class="btn" onclick="toggleForm('moneyForm')">💸 Send Money Menu</button>
+            
+            <div id="moneyForm" style="display:none; margin-top:15px;">
+                <h3>Money Authorization</h3>
+                <input type="text" id="sender_name" placeholder="Your Name">
+                <input type="password" id="sender_pass" placeholder="Your Password">
+                <input type="text" id="receiver_name" placeholder="Receiver Name">
+                <input type="number" id="send_amount" placeholder="Amount (Rs.)">
+                <button class="btn" onclick="executeTransfer()">Confirm Auto-Transfer</button>
+            </div>
+        </div>
+
+        <!-- WEB 2: DOMAIN MARKETPLACE -->
+        <div class="card">
+            <h2>Web 2: Invalid Domain Portal</h2>
+            <p style="font-size: 0.9rem; color: #9ca3af;">*System uses alphanumeric rules ($a=1...z=26$) for password check.</p>
+            
+            <div style="margin-top:20px;">
+                <input type="text" id="dom_user" placeholder="Seller User Name (e.g., a)">
+                <input type="text" id="dom_name" placeholder="Domain Name (e.g., a)">
+                <input type="text" id="dom_pass" placeholder="Cipher Password (e.g., 1,1)">
+                <input type="text" id="dom_target" placeholder="Reward Target Account (e.g., Muhammad TAQI)">
+                <button class="btn" style="background: #ef4444; color: white;" onclick="executeDomainSale()">Verify & Sell Domain</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm(id) {
+            var x = document.getElementById(id);
+            x.style.display = (x.style.display === "none") ? "block" : "none";
+        }
+
+        async function executeTransfer() {
+            const response = await fetch('/send_money', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    sender_name: document.getElementById('sender_name').value,
+                    password: document.getElementById('sender_pass').value,
+                    receiver_name: document.getElementById('receiver_name').value,
+                    amount: document.getElementById('send_amount').value
+                })
+            });
+            const res = await response.json();
+            alert(res.message);
+            if(res.status === "success") location.reload();
+        }
+
+        async function executeDomainSale() {
+            const response = await fetch('/sell_domain', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('dom_user').value,
+                    domain: document.getElementById('dom_name').value,
+                    password: document.getElementById('dom_pass').value,
+                    target_account: document.getElementById('dom_target').value
+                })
+            });
+            const res = await response.json();
+            alert(res.message);
+            if(res.status === "success") location.reload();
+        }
+    </script>
+</body>
+</html>
